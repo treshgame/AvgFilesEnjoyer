@@ -23,7 +23,15 @@
                <Insets />
             </HBox.margin>
          </Label>
+         <Button fx:id="createDirButton" mnemonicParsing="false" text="CreateDir">
+            <HBox.margin>
+               <Insets left="30.0" />
+            </HBox.margin>
+         </Button>
       </children>
+      <VBox.margin>
+         <Insets />
+      </VBox.margin>
    </HBox>
    <ListView fx:id="filesListView" editable="true" prefHeight="421.0" prefWidth="713.0" />
 </VBox>

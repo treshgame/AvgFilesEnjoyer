@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable {
@@ -23,6 +24,8 @@ public class MainWindowController implements Initializable {
     private Label currentDirLabel;
     @FXML
     private Button goBackButton;
+    @FXML
+    private Button createDirButton;
 
     private ObservableList<FilesListItem> currentDirFilesList;
     private FilesManager filesManager;
@@ -36,15 +39,14 @@ public class MainWindowController implements Initializable {
         filesManager.moveToDirectory(Path.of(ROOT_DIRECTORY));
 
         goBackButton.setOnMouseClicked(event -> filesManager.moveToPreviousDirectory());
+        createDirButton.setOnMouseClicked(this::handleCreateDirectoryButton);
 
         currentDirLabel.setText(ROOT_DIRECTORY);
     }
 
     private void initFilesListView() {
         filesListView.setItems(currentDirFilesList);
-
         filesListView.setCellFactory(listView -> new FilesListItemCell());
-
         filesListView.setOnMouseClicked(this::filesListDoubleClickHandler);
     }
 
@@ -62,5 +64,22 @@ public class MainWindowController implements Initializable {
             }
             case FILE -> System.out.println("FIle is chosen, so there's nothing to do yet");
         }
+    }
+
+    private void handleCreateDirectoryButton(MouseEvent event) {
+        Optional<String> newDirNameOpt = getInputFromTextInputDialog();
+        if (newDirNameOpt.isEmpty()) {
+            return;
+        }
+
+        filesManager.createNewFileCurrentDir(newDirNameOpt.get());
+    }
+
+    private Optional<String> getInputFromTextInputDialog() {
+        var dialog = new TextInputDialog();
+        dialog.setHeaderText("Enter new directory name");
+        dialog.setTitle("Create dir");
+
+        return dialog.showAndWait();
     }
 }

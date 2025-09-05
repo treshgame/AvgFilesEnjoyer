@@ -1,7 +1,7 @@
 package dev.treshgame.avgfileenjoyer.service;
 
 import dev.treshgame.avgfileenjoyer.fxml.utils.AlertUtils;
-import dev.treshgame.avgfileenjoyer.models.FileListItemType;
+import dev.treshgame.avgfileenjoyer.fxml.utils.PathToFilesListItemConverter;
 import dev.treshgame.avgfileenjoyer.models.FilesListItem;
 import javafx.collections.ObservableList;
 
@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
- * Handles navigation in files system
+ * Handles navigation in files system and files create/delete
  */
 public class FilesManager {
     // TODO: move to some "Error handler class" for displaying alerts with errors
@@ -23,11 +23,6 @@ public class FilesManager {
 
     public FilesManager(ObservableList<FilesListItem> currentDirFiles) {
         this.currentDirFiles = currentDirFiles;
-    }
-
-    public FilesManager(ObservableList<FilesListItem> currentDirFiles, Path initDir) {
-        this.currentDirFiles = currentDirFiles;
-        moveToDirectory(initDir);
     }
 
     public void moveToDirectory(Path destinationDir) {
@@ -52,13 +47,19 @@ public class FilesManager {
     }
 
     private void addPathToFilesList(Path path) {
-        var fileName = path.getFileName().toString();
-        FileListItemType filesItemType = Files.isDirectory(path) ? FileListItemType.DIR : FileListItemType.FILE;
-        var filesListItem = new FilesListItem(path, fileName, filesItemType);
+        var filesListItem = PathToFilesListItemConverter.convertToFilesListItem(path);
         currentDirFiles.add(filesListItem);
     }
 
-    public Path getCurrentDir() {
-        return this.currentDir;
+    public void createNewFileCurrentDir(String newDirName) {
+        Path newDirPath = currentDir.resolve(newDirName);
+
+        try {
+            Files.createDirectory(newDirPath);
+            var newFilesListItem = PathToFilesListItemConverter.convertToFilesListItem(newDirPath);
+            currentDirFiles.add(newFilesListItem);
+        } catch (IOException exception) {
+            AlertUtils.showErrorAlert("ERROR!", exception.getMessage());
+        }
     }
 }
