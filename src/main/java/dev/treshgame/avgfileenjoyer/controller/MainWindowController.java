@@ -5,6 +5,7 @@ import dev.treshgame.avgfileenjoyer.models.FilesListItem;
 import dev.treshgame.avgfileenjoyer.service.FilesManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -18,6 +19,7 @@ import java.util.ResourceBundle;
 public class MainWindowController implements Initializable {
     private final String ROOT_DIRECTORY = "/";
 
+    // TODO: FilesListItem is probably useless, delete it and left just Path object
     @FXML
     private ListView<FilesListItem> filesListView;
     @FXML
@@ -34,6 +36,8 @@ public class MainWindowController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         currentDirFilesList = FXCollections.observableArrayList();
 
+        filesListView.setContextMenu(createContextMenuForFilesItem());
+
         initFilesListView();
         filesManager = new FilesManager(currentDirFilesList);
         filesManager.moveToDirectory(Path.of(ROOT_DIRECTORY));
@@ -47,6 +51,7 @@ public class MainWindowController implements Initializable {
     private void initFilesListView() {
         filesListView.setItems(currentDirFilesList);
         filesListView.setCellFactory(listView -> new FilesListItemCell());
+
         filesListView.setOnMouseClicked(this::filesListDoubleClickHandler);
     }
 
@@ -81,5 +86,25 @@ public class MainWindowController implements Initializable {
         dialog.setTitle("Create dir");
 
         return dialog.showAndWait();
+    }
+
+    private ContextMenu createContextMenuForFilesItem() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem deleteMenuItem = new MenuItem("Delete");
+        MenuItem renameMenuItem = new MenuItem("Rename");
+
+        contextMenu.getItems().add(deleteMenuItem);
+        contextMenu.getItems().add(renameMenuItem);
+
+        deleteMenuItem.setOnAction(this::onDeleteFileMenuItem);
+
+        return contextMenu;
+    }
+
+    private void onDeleteFileMenuItem(ActionEvent event) {
+        FilesListItem selectedFile = filesListView.getSelectionModel().getSelectedItem();
+        int selectedFileIndex = filesListView.getSelectionModel().getSelectedIndex();
+        filesManager.deleteFile(selectedFile, selectedFileIndex);
     }
 }
