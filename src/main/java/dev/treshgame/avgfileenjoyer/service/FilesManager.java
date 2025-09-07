@@ -1,5 +1,6 @@
 package dev.treshgame.avgfileenjoyer.service;
 
+import dev.treshgame.avgfileenjoyer.comparatos.SortByFileTypeComparator;
 import dev.treshgame.avgfileenjoyer.fxml.utils.AlertUtils;
 import dev.treshgame.avgfileenjoyer.fxml.utils.PathToFilesListItemConverter;
 import dev.treshgame.avgfileenjoyer.models.FilesListItem;
@@ -33,6 +34,8 @@ public class FilesManager {
             currentDirFiles.clear();
             filesStream.forEach(this::addPathToFilesList);
             currentDir = destinationDir;
+            //TODO: Implement Strategy pattern to have several sorting methods;
+            currentDirFiles.sort(new SortByFileTypeComparator());
         } catch(IOException e) {
             AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, e.getMessage());
         }
@@ -97,5 +100,18 @@ public class FilesManager {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    public void renameFile(Path fileToRename, String newName, int selectedFileIndex) {
+        try {
+            Path newFileName = fileToRename.resolveSibling(newName);
+            Files.move(fileToRename, newFileName);
+
+            FilesListItem file = currentDirFiles.get(selectedFileIndex);
+            file.setFileName(newFileName.getFileName().toString());
+//            currentDirFiles.set(selectedFileIndex, file);
+        } catch (IOException exception) {
+            AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, exception.getMessage());
+        }
     }
 }

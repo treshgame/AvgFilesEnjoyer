@@ -8,8 +8,11 @@ public class FilesListItemCell extends ListCell<FilesListItem> {
     protected void updateItem(FilesListItem listItem, boolean empty) {
         super.updateItem(listItem, empty);
         if (empty || listItem == null)  {
-            setText(null); } else {
-            setText(listItem.getName() + "\t" + listItem.getType().getName());
+            textProperty().unbind();
+            setText(null);
+        } else {
+            textProperty().unbind();
+            textProperty().bind(listItem.getFileNameProperty());
         }
     }
 }

@@ -19,6 +19,12 @@ import java.util.ResourceBundle;
 public class MainWindowController implements Initializable {
     private final String ROOT_DIRECTORY = "/";
 
+    private final String CREATE_DIR_DIALOG_HEADER = "Enter new directory name";
+    private final String CREATE_DIR_DIALOG_TITLE = "Create dir";
+
+    private final String RENAME_FILE_DIALOG_HEADER = "Enter new name";
+    private final String RENAME_FILE_DIALOG_TITLE = "Rename file";
+
     // TODO: FilesListItem is probably useless, delete it and left just Path object
     @FXML
     private ListView<FilesListItem> filesListView;
@@ -72,7 +78,7 @@ public class MainWindowController implements Initializable {
     }
 
     private void handleCreateDirectoryButton(MouseEvent event) {
-        Optional<String> newDirNameOpt = getInputFromTextInputDialog();
+        Optional<String> newDirNameOpt = getInputFromTextInputDialog(CREATE_DIR_DIALOG_HEADER, CREATE_DIR_DIALOG_TITLE);
         if (newDirNameOpt.isEmpty()) {
             return;
         }
@@ -80,12 +86,16 @@ public class MainWindowController implements Initializable {
         filesManager.createNewFileCurrentDir(newDirNameOpt.get());
     }
 
-    private Optional<String> getInputFromTextInputDialog() {
-        var dialog = new TextInputDialog();
-        dialog.setHeaderText("Enter new directory name");
-        dialog.setTitle("Create dir");
+    private Optional<String> getInputFromTextInputDialog(String headerText, String title, String defaultValue) {
+        var dialog = new TextInputDialog(defaultValue);
+        dialog.setHeaderText(headerText);
+        dialog.setTitle(title);
 
         return dialog.showAndWait();
+    }
+
+    private Optional<String> getInputFromTextInputDialog(String headerText, String title) {
+        return getInputFromTextInputDialog(headerText, title, "");
     }
 
     private ContextMenu createContextMenuForFilesItem() {
@@ -98,6 +108,7 @@ public class MainWindowController implements Initializable {
         contextMenu.getItems().add(renameMenuItem);
 
         deleteMenuItem.setOnAction(this::onDeleteFileMenuItem);
+        renameMenuItem.setOnAction(this::onRenameFileItem);
 
         return contextMenu;
     }
@@ -106,5 +117,21 @@ public class MainWindowController implements Initializable {
         FilesListItem selectedFile = filesListView.getSelectionModel().getSelectedItem();
         int selectedFileIndex = filesListView.getSelectionModel().getSelectedIndex();
         filesManager.deleteFile(selectedFile, selectedFileIndex);
+    }
+
+    private void onRenameFileItem(ActionEvent event) {
+        FilesListItem selectedFile = filesListView.getSelectionModel().getSelectedItem();
+        String fileName = selectedFile.getPath().getFileName().toString();
+        Optional<String> newNameOpt = getInputFromTextInputDialog(
+                RENAME_FILE_DIALOG_HEADER, RENAME_FILE_DIALOG_TITLE, fileName
+        );
+
+        if (newNameOpt.isEmpty()) {
+            return;
+        }
+
+        int selectedFileIndex = filesListView.getSelectionModel().getSelectedIndex();
+        filesManager.renameFile(selectedFile.getPath(), newNameOpt.get(), selectedFileIndex);
+        filesListView.edit(selectedFileIndex);
     }
 }

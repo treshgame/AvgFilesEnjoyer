@@ -1,15 +1,18 @@
 package dev.treshgame.avgfileenjoyer.models;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.nio.file.Path;
 
 public class FilesListItem {
+    private final StringProperty fileNameProperty;
     private Path path;
-    private String name;
     private FileListItemType type;
 
     public FilesListItem(Path path, String name, FileListItemType type) {
         this.path = path;
-        this.name = name;
+        this.fileNameProperty = new SimpleStringProperty(name);
         this.type = type;
     }
 
@@ -21,14 +24,6 @@ public class FilesListItem {
         this.path = path;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public FileListItemType getType() {
         return type;
     }
@@ -37,11 +32,23 @@ public class FilesListItem {
         this.type = type;
     }
 
+    public String getFileName() {
+        return fileNameProperty.get();
+    }
+
+    public void setFileName(String fileNameProperty) {
+        this.fileNameProperty.set(fileNameProperty);
+    }
+
+    public StringProperty getFileNameProperty() {
+        return this.fileNameProperty;
+    }
+
     @Override
     public String toString() {
         return "FilesListItem{" +
                 "path='" + path + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + fileNameProperty.get() + '\'' +
                 ", type=" + type +
                 '}';
     }
