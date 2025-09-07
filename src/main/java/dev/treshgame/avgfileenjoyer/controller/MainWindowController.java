@@ -1,5 +1,6 @@
 package dev.treshgame.avgfileenjoyer.controller;
 
+import dev.treshgame.avgfileenjoyer.comparatos.FilesSortType;
 import dev.treshgame.avgfileenjoyer.fxml.cell.FilesListItemCell;
 import dev.treshgame.avgfileenjoyer.models.FilesListItem;
 import dev.treshgame.avgfileenjoyer.service.FilesManager;
@@ -25,7 +26,6 @@ public class MainWindowController implements Initializable {
     private final String RENAME_FILE_DIALOG_HEADER = "Enter new name";
     private final String RENAME_FILE_DIALOG_TITLE = "Rename file";
 
-    // TODO: FilesListItem is probably useless, delete it and left just Path object
     @FXML
     private ListView<FilesListItem> filesListView;
     @FXML
@@ -103,14 +103,33 @@ public class MainWindowController implements Initializable {
 
         MenuItem deleteMenuItem = new MenuItem("Delete");
         MenuItem renameMenuItem = new MenuItem("Rename");
+        Menu sortByMenu = initSortByMenuItem();
 
         contextMenu.getItems().add(deleteMenuItem);
         contextMenu.getItems().add(renameMenuItem);
+        contextMenu.getItems().add(sortByMenu);
 
         deleteMenuItem.setOnAction(this::onDeleteFileMenuItem);
         renameMenuItem.setOnAction(this::onRenameFileItem);
 
         return contextMenu;
+    }
+
+    private Menu initSortByMenuItem() {
+        Menu sortByMenu = new Menu("Sort by");
+        RadioMenuItem sortByTypeMenuItem = new RadioMenuItem("Type");
+        RadioMenuItem sortByNameMenuItem = new RadioMenuItem("Name");
+
+        ToggleGroup toggleGroup = new ToggleGroup();
+        sortByTypeMenuItem.setToggleGroup(toggleGroup);
+        sortByNameMenuItem.setToggleGroup(toggleGroup);
+
+        sortByTypeMenuItem.setOnAction(event -> filesManager.changeSortType(FilesSortType.FILE_TYPE));
+        sortByNameMenuItem.setOnAction(event -> filesManager.changeSortType(FilesSortType.FILE_NAME));
+
+        sortByMenu.getItems().add(sortByTypeMenuItem);
+        sortByMenu.getItems().add(sortByNameMenuItem);
+        return sortByMenu;
     }
 
     private void onDeleteFileMenuItem(ActionEvent event) {

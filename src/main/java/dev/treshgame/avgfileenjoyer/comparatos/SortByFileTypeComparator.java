@@ -17,7 +17,7 @@ public class SortByFileTypeComparator implements Comparator<FilesListItem> {
                 return 1;
             }
         } else {
-            return t1.getPath().toString().compareTo(t2.getPath().toString());
+            return t1.getFileName().compareTo(t2.getFileName());
         }
     }
 }

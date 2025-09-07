@@ -1,6 +1,8 @@
 package dev.treshgame.avgfileenjoyer.service;
 
+import dev.treshgame.avgfileenjoyer.comparatos.FilesSortType;
 import dev.treshgame.avgfileenjoyer.comparatos.SortByFileTypeComparator;
+import dev.treshgame.avgfileenjoyer.comparatos.SortingTypeContext;
 import dev.treshgame.avgfileenjoyer.fxml.utils.AlertUtils;
 import dev.treshgame.avgfileenjoyer.fxml.utils.PathToFilesListItemConverter;
 import dev.treshgame.avgfileenjoyer.models.FilesListItem;
@@ -24,9 +26,12 @@ public class FilesManager {
     private final ObservableList<FilesListItem> currentDirFiles;
 
     private Path currentDir;
+    private final SortingTypeContext sortingTypeContext;
+
 
     public FilesManager(ObservableList<FilesListItem> currentDirFiles) {
         this.currentDirFiles = currentDirFiles;
+        sortingTypeContext = new SortingTypeContext(FilesSortType.FILE_TYPE);
     }
 
     public void moveToDirectory(Path destinationDir) {
@@ -34,13 +39,11 @@ public class FilesManager {
             currentDirFiles.clear();
             filesStream.forEach(this::addPathToFilesList);
             currentDir = destinationDir;
-            //TODO: Implement Strategy pattern to have several sorting methods;
-            currentDirFiles.sort(new SortByFileTypeComparator());
+            sortingTypeContext.sort(currentDirFiles);
         } catch(IOException e) {
             AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, e.getMessage());
         }
     }
-
 
     public void moveToPreviousDirectory() {
         Path parent = currentDir.getParent();
@@ -109,9 +112,15 @@ public class FilesManager {
 
             FilesListItem file = currentDirFiles.get(selectedFileIndex);
             file.setFileName(newFileName.getFileName().toString());
-//            currentDirFiles.set(selectedFileIndex, file);
         } catch (IOException exception) {
             AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, exception.getMessage());
+        }
+    }
+
+    public void changeSortType(FilesSortType filesSortType) {
+        if (filesSortType != sortingTypeContext.getSortType()) {
+            sortingTypeContext.setSortType(filesSortType);
+            sortingTypeContext.sort(currentDirFiles);
         }
     }
 }
