@@ -104,10 +104,12 @@ public class MainWindowController implements Initializable {
         MenuItem deleteMenuItem = new MenuItem("Delete");
         MenuItem renameMenuItem = new MenuItem("Rename");
         Menu sortByMenu = initSortByMenuItem();
+        Menu showHiddenFilesMenu = initShowHiddenFilesMenu();
 
         contextMenu.getItems().add(deleteMenuItem);
         contextMenu.getItems().add(renameMenuItem);
         contextMenu.getItems().add(sortByMenu);
+        contextMenu.getItems().add(showHiddenFilesMenu);
 
         deleteMenuItem.setOnAction(this::onDeleteFileMenuItem);
         renameMenuItem.setOnAction(this::onRenameFileItem);
@@ -130,6 +132,26 @@ public class MainWindowController implements Initializable {
         sortByMenu.getItems().add(sortByTypeMenuItem);
         sortByMenu.getItems().add(sortByNameMenuItem);
         return sortByMenu;
+    }
+
+    private Menu initShowHiddenFilesMenu() {
+        Menu showHiddenFilesMenu = new Menu("Show hidden files");
+
+        RadioMenuItem showHiddenFilesItem = new RadioMenuItem("Show");
+        RadioMenuItem hideHiddenFilesItem = new RadioMenuItem("Hide");
+
+        ToggleGroup toggleGroup = new ToggleGroup();
+
+        showHiddenFilesMenu.getItems().add(showHiddenFilesItem);
+        showHiddenFilesMenu.getItems().add(hideHiddenFilesItem);
+
+        showHiddenFilesItem.setToggleGroup(toggleGroup);
+        hideHiddenFilesItem.setToggleGroup(toggleGroup);
+
+        showHiddenFilesItem.setOnAction(event -> filesManager.setShowHiddenFiles(true));
+        hideHiddenFilesItem.setOnAction(event -> filesManager.setShowHiddenFiles(false));
+
+        return showHiddenFilesMenu;
     }
 
     private void onDeleteFileMenuItem(ActionEvent event) {

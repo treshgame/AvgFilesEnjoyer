@@ -1,7 +1,6 @@
 package dev.treshgame.avgfileenjoyer.service;
 
 import dev.treshgame.avgfileenjoyer.comparatos.FilesSortType;
-import dev.treshgame.avgfileenjoyer.comparatos.SortByFileTypeComparator;
 import dev.treshgame.avgfileenjoyer.comparatos.SortingTypeContext;
 import dev.treshgame.avgfileenjoyer.fxml.utils.AlertUtils;
 import dev.treshgame.avgfileenjoyer.fxml.utils.PathToFilesListItemConverter;
@@ -28,6 +27,7 @@ public class FilesManager {
     private Path currentDir;
     private final SortingTypeContext sortingTypeContext;
 
+    private boolean showHiddenFiles = false;
 
     public FilesManager(ObservableList<FilesListItem> currentDirFiles) {
         this.currentDirFiles = currentDirFiles;
@@ -56,8 +56,14 @@ public class FilesManager {
     }
 
     private void addPathToFilesList(Path path) {
-        var filesListItem = PathToFilesListItemConverter.convertToFilesListItem(path);
-        currentDirFiles.add(filesListItem);
+        try {
+            var filesListItem = PathToFilesListItemConverter.convertToFilesListItem(path);
+            if (showHiddenFiles || !filesListItem.isHidden()) {
+                currentDirFiles.add(filesListItem);
+            }
+        } catch (IOException e) {
+            AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, e.getMessage());
+        }
     }
 
     public void createNewFileCurrentDir(String newDirName) {
@@ -111,16 +117,42 @@ public class FilesManager {
             Files.move(fileToRename, newFileName);
 
             FilesListItem file = currentDirFiles.get(selectedFileIndex);
+            file.setPath(newFileName);
             file.setFileName(newFileName.getFileName().toString());
         } catch (IOException exception) {
             AlertUtils.showErrorAlert(DEFAULT_ERROR_HEADER, exception.getMessage());
         }
     }
 
+    /**
+     * Change how files are sorted in the list
+     *
+     * @param filesSortType - type of sorting
+     */
     public void changeSortType(FilesSortType filesSortType) {
         if (filesSortType != sortingTypeContext.getSortType()) {
             sortingTypeContext.setSortType(filesSortType);
             sortingTypeContext.sort(currentDirFiles);
+        }
+    }
+
+    /**
+     * Hide/show files depends on the new property
+     *
+     * @param show - show hidden files or not
+     */
+    public void setShowHiddenFiles(boolean show) {
+        if (show == showHiddenFiles) {
+            return;
+        }
+
+        showHiddenFiles = show;
+        if (!show) {
+            currentDirFiles.removeIf(FilesListItem::isHidden);
+        } else {
+            // Not really efficient to search files in the same directory again
+            // But I do it in case if new hidden files were added
+            moveToDirectory(currentDir);
         }
     }
 }
